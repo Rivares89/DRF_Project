@@ -11,16 +11,23 @@ class QuantitySerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     course_quantity = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Course
-        fields = '__all__'
+    is_subscribed = serializers.SerializerMethodField()
 
     def get_course_quantity(self, instance):
         quantity_instance = instance.quantity_set.first()
         if quantity_instance:
             return quantity_instance.quantity
         return 0
+
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return Subscription.objects.filter(user=user, course=obj).exists()
+        return False
+
+    class Meta:
+        model = Course
+        fields = '__all__'
 
 class LessonSerializer(serializers.ModelSerializer):
 
