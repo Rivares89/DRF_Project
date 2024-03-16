@@ -39,6 +39,15 @@ class Payment(models.Model):
     payment_method = models.CharField(max_length=50,
                                       choices=(('CARD', 'картой'), ('CASH', 'наличными')),
                                       verbose_name='способ оплаты', **NULLABLE)
+    payment_link = models.URLField(max_length=400, verbose_name='ссылка для оплаты', **NULLABLE)
+    payment_id = models.CharField(max_length=255, verbose_name='идентификатор платежа', **NULLABLE)
+
+    def __str__(self):
+        return f"{self.user}: ({self.course})"
+
+    class Meta:
+        verbose_name = "платеж"
+        verbose_name_plural = "платежи"
 
     def __str__(self):
         return f'{self.user} - {self.course if self.course else self.lesson} - {self.sum}'
