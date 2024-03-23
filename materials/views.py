@@ -10,6 +10,7 @@ from materials.models import Course, Lesson, Quantity, Subscription
 from materials.paginators import LessonPaginator
 from materials.permissions import IsOwnerOrStaff, IsManager, IsOwner
 from materials.serializers import CourseSerializer, LessonSerializer, QuantitySerializer, CourseQuantitySerializer
+from materials.tasks import send_mail_update_course
 
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
@@ -33,6 +34,11 @@ class CourseViewSet(viewsets.ModelViewSet):
         new_course = serializer.save()
         new_course.owner = self.request.user
         new_course.save()
+
+    def perform_update(self, serializer):
+        update_course = serializer.save()
+        send_mail_update_course.delay(update_course.id)
+        update_course.save()
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
